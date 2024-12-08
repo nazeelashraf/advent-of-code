@@ -1,0 +1,11 @@
+grid = []
+startingPoint = None
+
+with open("input.txt", "r") as file:
+    line = file.readline()
+    i = 0
+    while line:
+        if not startingPoint and "^" in line:
+            startingPoint = (i, line.index("^"))
+        grid.append(list(line()))
+        line = file.readline()
