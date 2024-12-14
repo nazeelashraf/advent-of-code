@@ -4,7 +4,7 @@ grid = []
 
 visited = set()
 
-isDiscount = False
+isDiscount = True
 
 with open("input.txt", "r") as file:
     line = file.readline().strip()
@@ -33,37 +33,31 @@ def getGoodNeighbours(r, c):
     return neighbours
 
 
-def findEdges(nodes):
-    verticalEdgeCount = 0
-    horizontalEdgeCount = 0
+cornerPositions = [
+    ((1, 1), (1, 0), (0, 1)),
+    ((-1, -1), (-1, 0), (0, -1)),
+    ((1, -1), (0, -1), (1, 0)),
+    ((-1, 1), (-1, 0), (0, 1)),
+]
 
-    horizontal = sorted(nodes, key=lambda s: (s[0], s[1]))
-    vertical = sorted(nodes, key=lambda s: (s[1], s[0]))
 
-    isHorizontal = False
-    isVertical = False
-    for i in range(1, len(horizontal)):
-        newIsHorizontal = (
-            horizontal[i][0] == horizontal[i - 1][0]
-            and horizontal[i][1] == horizontal[i - 1][1] + 1
-        )
-        newIsVertical = (
-            vertical[i][1] == vertical[i - 1][1]
-            and vertical[i][0] == vertical[i - 1][0] + 1
-        )
-        if newIsHorizontal and not isHorizontal:
-            horizontalEdgeCount += 1
-        if newIsVertical and not isVertical:
-            verticalEdgeCount += 1
+def getCorners(r, c):
+    corners = 0
+    val = grid[r][c]
+    for (dr, dc), (dra, dca), (drb, dcb) in cornerPositions:
+        if (
+            isValidPosition(r + dr, c + dc, val)
+            and isValidPosition(r + dra, c + dca, val)
+            == isValidPosition(r + drb, c + dcb, val)
+            == False
+        ):
+            corners += 1
+        elif not isValidPosition(r + dr, c + dc, val) and isValidPosition(
+            r + dra, c + dca, val
+        ) == isValidPosition(r + drb, c + dcb, val):
+            corners += 1
 
-        isHorizontal, isVertical = newIsHorizontal, newIsVertical
-
-    print("----")
-    print(horizontal, horizontalEdgeCount * 2)
-    print(vertical, verticalEdgeCount * 2)
-    print("----")
-
-    return horizontalEdgeCount + verticalEdgeCount
+    return corners
 
 
 def bfs(row, col):
@@ -71,8 +65,7 @@ def bfs(row, col):
     area, perimeter = 0, 0
     queue.append((row, col))
 
-    allNeighbours = set()
-    allNeighbours.add((row, col))
+    corners = 0
 
     while queue:
         for i in range(len(queue)):
@@ -83,13 +76,14 @@ def bfs(row, col):
             area += 1
             perimeter += len(directions) - len(goodNeighbours)
             visited.add((r, c))
+            corners += getCorners(r, c)
 
             for neighbour in goodNeighbours:
                 queue.append(neighbour)
-                allNeighbours.add(neighbour)
+                # allNeighbours.add(neighbour)
 
     if isDiscount:
-        perimeter = findEdges(list(allNeighbours))
+        perimeter = corners
     return area, perimeter
 
 
@@ -99,5 +93,4 @@ for r in range(ROWS):
         if (r, c) not in visited:
             area, perimeter = bfs(r, c)
             totalCost += area * perimeter
-
 print(totalCost)
