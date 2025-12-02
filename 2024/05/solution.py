@@ -2,6 +2,7 @@ from collections import defaultdict
 
 rules = defaultdict(set)
 updates = []
+swaps = 0
 
 with open("input.txt") as file:
     line = file.readline()
@@ -36,6 +37,7 @@ def isValidUpdate(update):
 
 
 def correctUpdate(update):
+    global swaps
     correctedUpdate = update.copy()
 
     for i in range(1, len(update)):
@@ -54,6 +56,7 @@ def correctUpdate(update):
                     correctedUpdate[i],
                     correctedUpdate[index],
                 )
+                swaps += 1
                 newPage = page
     return correctedUpdate
 
@@ -73,3 +76,4 @@ def getValidPageCount(updates):
 
 
 print(f"Correctly-ordered update sum: {getValidPageCount(updates)}")
+print(f"Swaps: {swaps}")
